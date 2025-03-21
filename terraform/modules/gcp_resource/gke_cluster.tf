@@ -1,6 +1,6 @@
 resource "google_compute_network" "default" {
-  name = "example-network"
-
+  name      = "example-network"
+  project   = var.project_id
   auto_create_subnetworks  = false
   enable_ula_internal_ipv6 = true
 }
@@ -10,7 +10,7 @@ resource "google_compute_subnetwork" "default" {
 
   ip_cidr_range = "10.0.0.0/16"
   region        = var.region
-
+  project       = var.project_id
   stack_type       = "IPV4_IPV6"
   ipv6_access_type = "INTERNAL" # Change to "EXTERNAL" if creating an external loadbalancer
 
@@ -27,8 +27,8 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_container_cluster" "default" {
-  name = "example-autopilot-cluster"
-
+  name                     = "example-autopilot-cluster"
+  project                  = var.project_id
   location                 = var.region
   enable_autopilot         = true
   enable_l4_ilb_subsetting = true
