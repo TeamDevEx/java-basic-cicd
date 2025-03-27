@@ -1,15 +1,8 @@
-data "google_client_config" "default" {}
-
 provider "kubernetes" {
-  host                   = "https://${google_container_cluster.default.endpoint}"
-  token                  = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(google_container_cluster.default.master_auth[0].cluster_ca_certificate)
-
-  ignore_annotations = [
-    "^autopilot\\.gke\\.io\\/.*",
-    "^cloud\\.google\\.com\\/.*"
-  ]
+  config_path = "~/.kube/config"       # Points to the kubeconfig file
+  config_context = "gke_off-net-dev_northamerica-northeast1_java-springboot-devops"  # Optional: Specify the context
 }
+
 
 resource "kubernetes_deployment" "deployment_1" {
   metadata {
