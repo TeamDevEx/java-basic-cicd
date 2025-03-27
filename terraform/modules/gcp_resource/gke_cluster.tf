@@ -1,6 +1,5 @@
-# update SA
-resource "google_container_cluster" "jva_cicd_cluster" {
-  name     = "jva-cicd-cluster"
+resource "google_container_cluster" "java_springboot_devops" {
+  name     = "java-springboot-devops"
   location = var.region
   enable_autopilot = true
 }
