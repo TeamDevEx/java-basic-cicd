@@ -33,7 +33,7 @@ resource "kubernetes_deployment" "java_rest_app" {
   }
 }
 
-resource "kubernetes_horizontal_pod_autoscaler_v2beta1" "java_rest_app_hpa" {
+resource "kubernetes_horizontal_pod_autoscaler_v2beta2" "java_rest_app_hpa" {
   metadata {
     name      = "java-rest-app-hpa-kfqf"
     namespace = "default"
