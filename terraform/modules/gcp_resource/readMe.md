@@ -30,3 +30,8 @@ gcloud projects add-iam-policy-binding off-net-dev \
     kubectl get services
     kubectl expose deployment java-rest-app --type=LoadBalancer --name=my-service --port=80 --target-port=8080
     remove kubectl delete service my-service
+
+# Docker
+
+docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .  
+docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
