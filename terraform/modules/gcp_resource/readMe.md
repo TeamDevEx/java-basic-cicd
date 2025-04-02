@@ -37,3 +37,7 @@ docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/s
 docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
 
 docker run -p 8080:8080 61d94589a90c
+
+- deployment and load balancer can be build together
+
+# the proble with this implementation is that the image is not recognized , comment strategy didnt work
