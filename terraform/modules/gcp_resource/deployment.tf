@@ -6,6 +6,7 @@ data "google_container_cluster" "my_cluster" {
 
 data "google_client_config" "provider" {}
 
+# deploy version 2 4-3-2025
 resource "kubernetes_deployment" "deployment" {
   metadata {
     name      = "java-rest-app"
