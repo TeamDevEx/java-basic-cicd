@@ -1,3 +1,13 @@
+
+data "google_container_cluster" "my_cluster" {
+  name     = "java_rest_app"
+  location = var.region
+  project  = var.project_id
+}
+
+data "google_client_config" "provider" {}
+
+
 resource "kubernetes_deployment" "java_rest_app" {
   metadata {
     name      = "java-rest-app"
