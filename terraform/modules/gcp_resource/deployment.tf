@@ -7,6 +7,7 @@ data "google_container_cluster" "my_cluster" {
 data "google_client_config" "provider" {}
 
 
+# added Kubernetes Engine Developer role
 resource "kubernetes_deployment" "deployment" {
   metadata {
     name      = "java-rest-app"
