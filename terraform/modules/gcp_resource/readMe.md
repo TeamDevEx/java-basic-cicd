@@ -35,3 +35,5 @@ gcloud projects add-iam-policy-binding off-net-dev \
 
 docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .  
 docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
+
+docker run -p 8080:8080 61d94589a90c
