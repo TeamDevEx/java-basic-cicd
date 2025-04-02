@@ -6,7 +6,6 @@ data "google_container_cluster" "my_cluster" {
 
 data "google_client_config" "provider" {}
 
-# added role Kubernetes Engine Developer
 resource "kubernetes_deployment" "deployment" {
   metadata {
     name      = "java-rest-app"
@@ -42,7 +41,7 @@ resource "kubernetes_deployment" "deployment" {
   }
 }
 
-resource "kubernetes_horizontal_pod_autoscaler_v2beta2" "java_rest_app_hpa" {
+resource "kubernetes_horizontal_pod_autoscaler_v2" "java_rest_app_hpa" {
   metadata {
     name      = "java-rest-app-hpa-kfqf"
     namespace = "default"
@@ -71,28 +70,5 @@ resource "kubernetes_horizontal_pod_autoscaler_v2beta2" "java_rest_app_hpa" {
         }
       }
     }
-  }
-}
-
-resource "kubernetes_service" "java_rest_app_service" {
-  metadata {
-    name      = "java-rest-app-service"
-    namespace = "default"
-    labels = {
-      app = "java-rest-app"
-    }
-  }
-
-  spec {
-    selector = {
-      app = "java-rest-app"
-    }
-
-    port {
-      protocol = "TCP"
-      port     = 80
-    }
-
-    type = "LoadBalancer"
   }
 }
