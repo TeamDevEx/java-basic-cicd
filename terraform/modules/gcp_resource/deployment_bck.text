@@ -6,7 +6,6 @@ data "google_container_cluster" "my_cluster" {
 
 data "google_client_config" "provider" {}
 
-# deploy version 2 4-3-2025
 resource "kubernetes_deployment" "deployment" {
   metadata {
     name      = "java-rest-app"
@@ -71,5 +70,25 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "java_rest_app_hpa" {
         }
       }
     }
+  }
+}
+
+
+resource "kubernetes_service" "my_service" {
+  metadata {
+    name = "my-service"
+  }
+
+  spec {
+    selector = {
+      app = "java-rest-app"
+    }
+
+    port {
+      port        = 80
+      target_port = 8080
+    }
+
+    type = "LoadBalancer"
   }
 }
