@@ -19,8 +19,10 @@ resource "kubernetes_ingress_v1" "java_rest_app_ingress" {
   metadata {
     name = "java-rest-app-ingress"
     annotations = {
-      "kubernetes.io/ingress.class"                 = "gce"
-      "kubernetes.io/ingress.global-static-ip-name" = google_compute_global_address.java_rest_app_ip.name
+      "kubernetes.io/ingress.class"                = "gce"
+      "kubernetes.io/ingress.regional-static-ip-name" = google_compute_address.java_rest_app_ip.name
+      "kubernetes.io/ingress.allow-http"           = "true"
+      "ingress.gcp.kubernetes.io/pre-shared-cert"  = ""
     }
   }
 
@@ -36,10 +38,12 @@ resource "kubernetes_ingress_v1" "java_rest_app_ingress" {
   }
 }
 
-resource "google_compute_global_address" "java_rest_app_ip" {
-  name = "java-rest-app-ip"
+resource "google_compute_address" "java_rest_app_ip" {
+  name         = "java-rest-app-ip"
+  address_type = "EXTERNAL"
+  region       = var.region
 }
 
 output "java_rest_app_ip" {
-  value = google_compute_global_address.java_rest_app_ip.address
+  value = google_compute_address.java_rest_app_ip.address
 }
