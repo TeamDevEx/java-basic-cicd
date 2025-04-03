@@ -93,8 +93,7 @@ jobs:
           java-version: "17"
 
       - name: Build JAR for main branch
-        if: env.TARGET_BRANCH == 'main'
-        working-directory: src
+        if: ${{ env.TARGET_BRANCH == 'main' }}
         run: mvn clean package -DskipTests
 
       - name: Build & Push Docker Image (Only for Main Branch)
