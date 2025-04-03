@@ -25,11 +25,11 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA }}
 
-      - name: Set TARGET_BRANCH environment variable
-        run: echo "TARGET_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
+      # - name: Set TARGET_BRANCH environment variable
+      #   run: echo "TARGET_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
 
-      - name: Echo target branch
-        run: echo "The target branch is ${{ env.TARGET_BRANCH }}"
+      # - name: Echo target branch
+      #   run: echo "The target branch is ${{ env.TARGET_BRANCH }}"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -81,34 +81,34 @@ jobs:
               body: output
             })
 
-      - name: Set up JDK 17 for main branch
-        if: env.TARGET_BRANCH == 'main'
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: "17"
+      # - name: Set up JDK 17 for main branch
+      #   if: env.TARGET_BRANCH == 'main'
+      #   uses: actions/setup-java@v3
+      #   with:
+      #     distribution: "temurin"
+      #     java-version: "17"
 
-      - name: Build JAR
-        if: ${{ env.TARGET_BRANCH == 'main' }}
-        run: mvn clean package -DskipTests
-        working-directory: ./
+      # - name: Build JAR
+      #   if: ${{ env.TARGET_BRANCH == 'main' }}
+      #   run: mvn clean package -DskipTests
+      #   working-directory: ./
 
-      - name: Build & Push Docker Image (Only for Main Branch)
-        if: env.TARGET_BRANCH == 'main'
-        run: |
-          gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
-          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
-        working-directory: ./
+      # - name: Build & Push Docker Image (Only for Main Branch)
+      #   if: env.TARGET_BRANCH == 'main'
+      #   run: |
+      #     gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
+      #     docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
+      #     docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
+      #   working-directory: ./
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
       - name: Terraform Apply (Main)
-        if: env.TARGET_BRANCH == 'main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
 
-      - name: Terraform Apply (Staging)
-        if: env.TARGET_BRANCH == 'staging' && github.event_name == 'push'
-        run: terraform apply -auto-approve -var="image_tag=latest"
+      # - name: Terraform Apply (Staging)
+      #   if: env.TARGET_BRANCH == 'staging' && github.event_name == 'push'
+      #   run: terraform apply -auto-approve -var="image_tag=latest"
