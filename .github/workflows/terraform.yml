@@ -25,9 +25,11 @@ jobs:
       #   with:
       #     credentials_json: ${{ secrets.GCP_SA }}
 
-      - name: Debug Pull Request Source Branch
-        run: |
-          run: echo "Target branch is ${{ github.event.pull_request.base.ref }}"
+      - name: Set TARGET_BRANCH environment variable
+        run: echo "TARGET_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
+
+      - name: Echo target branch
+        run: echo "The target branch is ${{ env.TARGET_BRANCH }}"
 
       # - name: Set Environment Variables
       #   run: |
