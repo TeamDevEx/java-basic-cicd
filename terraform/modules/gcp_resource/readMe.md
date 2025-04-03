@@ -25,6 +25,10 @@ gcloud projects add-iam-policy-binding off-net-dev \
  --member=serviceAccount:grafana-reload@off-net-dev.iam.gserviceaccount.com \
  --role=roles/compute.networkAdmin
 
+gcloud projects add-iam-policy-binding off-net-dev \
+ --member="serviceAccount:grafana-reload@off-net-dev.iam.gserviceaccount.com" \
+ --role="roles/artifactregistry.writer"
+
 # Kubectl
 
     kubectl get services
