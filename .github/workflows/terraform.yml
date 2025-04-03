@@ -81,10 +81,6 @@ jobs:
               body: output
             })
 
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
       - name: Set up JDK 17 for main branch
         if: env.TARGET_BRANCH == 'main'
         uses: actions/setup-java@v3
@@ -104,6 +100,10 @@ jobs:
           docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
           docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
         working-directory: ./
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
 
       - name: Terraform Apply (Main)
         if: env.TARGET_BRANCH == 'main' && github.event_name == 'push'
