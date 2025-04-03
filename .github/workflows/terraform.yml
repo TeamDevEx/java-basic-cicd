@@ -2,72 +2,85 @@ defaults:
   run:
     working-directory: "terraform"
 
-name: "Terraform CI/CD"
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
   pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  terraform:
-    name: "Terraform Infrastructure"
+  build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Authenticate with Google Cloud
-        uses: google-github-actions/auth@v1
+      - uses: google-github-actions/auth@v1
+        id: auth
         with:
           credentials_json: ${{ secrets.GCP_SA }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
       - name: Terraform Init
+        id: init
         run: terraform init
-        working-directory: terraform
 
       - name: Terraform Validate
+        id: validate
         run: terraform validate -no-color
-        working-directory: terraform
 
       - name: Terraform Plan
         id: plan
+        if: github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false
-        working-directory: terraform
+        continue-on-error: true
 
-      - name: Check if Deployment Files Changed
-        id: check_deploy
-        run: |
-          CHANGED_FILES=$(git diff --name-only origin/main)
-          echo "$CHANGED_FILES" > changed_files.txt
+      - uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
-          if grep -q "src/" changed_files.txt || grep -q "Dockerfile" changed_files.txt; then
-            echo "deploy_needed=true" >> $GITHUB_ENV
-            echo "::set-output name=deploy_needed::true"
-          else
-            echo "deploy_needed=false" >> $GITHUB_ENV
-            echo "::set-output name=deploy_needed::false"
-          fi
+            <details><summary>Show Plan</summary>
 
-      - name: Terraform Apply (Infrastructure)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
-        working-directory: terraform
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
 
-  deploy:
-    name: "Build & Deploy"
-    runs-on: ubuntu-latest
-    needs: terraform
-    if: needs.terraform.outputs.deploy_needed == 'true'
+            </details>
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -75,21 +88,45 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Build JAR with Maven
-        run: mvn clean install -DskipTests
-        working-directory: src
-
-      - name: Configure Docker to use GCP Artifact Registry
-        run: gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-
-      - name: Build and Push Docker Image
+      - name: Set Environment Variables
         run: |
-          IMAGE_TAG=$(date +%s)
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "DEPLOY_MODE=full" >> $GITHUB_ENV
+          else
+            echo "DEPLOY_MODE=deploy-only" >> $GITHUB_ENV
+          fi
 
-          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
-          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
+      - name: Build JAR (Only for Main Branch)
+        run: |
+          if [[ "$DEPLOY_MODE" == "full" ]]; then
+            mvn clean package -DskipTests
+          else
+            echo "Skipping JAR build"
+          fi
 
-      - name: Terraform Apply (Deployment)
-        run: terraform apply -auto-approve -var="image_tag=latest"
-        working-directory: terraform
+      - name: Build & Push Docker Image (Only for Main Branch)
+        run: |
+          if [[ "$DEPLOY_MODE" == "full" ]]; then
+            gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
+            docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
+            docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
+          else
+            echo "Skipping Docker image build and push"
+          fi
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          if [[ "$DEPLOY_MODE" == "full" ]]; then
+            terraform apply -auto-approve -input=false
+          else
+            echo "Skipping Terraform Apply"
+          fi
+
+      - name: Terraform Apply (For pushing non-main)
+        run: |
+          if [[ "$DEPLOY_MODE" == "deploy-only" ]]; then
+            terraform apply -auto-approve -var="image_tag=latest"
+          else
+            echo "Skipping Terraform Apply"
+          fi
