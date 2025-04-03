@@ -14,16 +14,16 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # - name: Set up Cloud SDK
-      #   uses: google-github-actions/setup-gcloud@v1
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
 
       - name: Checkout
         uses: actions/checkout@v3
 
-      # - uses: google-github-actions/auth@v1
-      #   id: auth
-      #   with:
-      #     credentials_json: ${{ secrets.GCP_SA }}
+      - uses: google-github-actions/auth@v1
+        id: auth
+        with:
+          credentials_json: ${{ secrets.GCP_SA }}
 
       - name: Set TARGET_BRANCH environment variable
         run: echo "TARGET_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_ENV
@@ -31,108 +31,90 @@ jobs:
       - name: Echo target branch
         run: echo "The target branch is ${{ env.TARGET_BRANCH }}"
 
-      # - name: Set Environment Variables
-      #   run: |
-      #     if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-      #       echo "DEPLOY_MODE=full" >> $GITHUB_ENV
-      #     else
-      #       echo "DEPLOY_MODE=deploy-only" >> $GITHUB_ENV
-      #     fi
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
 
-      # - name: Echo DEPLOY_MODE
-      #   run: echo "DEPLOY_MODE=$DEPLOY_MODE"
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
 
-      # - name: Setup Terraform
-      #   uses: hashicorp/setup-terraform@v2
+      - name: Terraform Init
+        id: init
+        run: terraform init
 
-      # - name: Terraform Format
-      #   id: fmt
-      #   run: terraform fmt -check
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
 
-      # - name: Terraform Init
-      #   id: init
-      #   run: terraform init
+      - name: Terraform Plan
+        id: plan
+        if: github.event_name == 'pull_request'
+        run: terraform plan -no-color -input=false
+        continue-on-error: true
 
-      # - name: Terraform Validate
-      #   id: validate
-      #   run: terraform validate -no-color
+      - uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
-      # - name: Terraform Plan
-      #   id: plan
-      #   if: github.event_name == 'pull_request'
-      #   run: terraform plan -no-color -input=false
-      #   continue-on-error: true
+            <details><summary>Show Plan</summary>
 
-      # - uses: actions/github-script@v6
-      #   if: github.event_name == 'pull_request'
-      #   env:
-      #     PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-      #   with:
-      #     github-token: ${{ secrets.GH_TOKEN }}
-      #     script: |
-      #       const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-      #       #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-      #       #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-      #       #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
 
-      #       <details><summary>Show Plan</summary>
+            </details>
 
-      #       \`\`\`\n
-      #       ${process.env.PLAN}
-      #       \`\`\`
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
 
-      #       </details>
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
 
-      #       *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
 
-      #       github.rest.issues.createComment({
-      #         issue_number: context.issue.number,
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         body: output
-      #       })
+      - name: Set up JDK 17 for main branch
+        if: env.TARGET_BRANCH == 'main'
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
-      # - name: Terraform Plan Status
-      #   if: steps.plan.outcome == 'failure'
-      #   run: exit 1
+      - name: Build JAR for main branch
+        if: env.TARGET_BRANCH == 'main'
+        run: mvn clean package -DskipTests
 
-      # - name: Set up JDK 17
-      #   uses: actions/setup-java@v3
-      #   with:
-      #     distribution: "temurin"
-      #     java-version: "17"
+      - name: Build & Push Docker Image (Only for Main Branch)
+        if: env.TARGET_BRANCH == 'main'
+        run: |
+          gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
+          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
+          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
 
-      # - name: Build JAR (Only for Main Branch)
-      #   run: |
-      #     if [[ "$DEPLOY_MODE" == "full" ]]; then
-      #       mvn clean package -DskipTests
-      #     else
-      #       echo "Skipping JAR build"
-      #     fi
+      - name: Terraform Apply
+        run: |
+          if: [[env.TARGET_BRANCH == 'main' && github.event_name == 'push']]; then
+            terraform apply -auto-approve -input=false
+          else
+            echo "Skipping Terraform Apply"
+          fi
 
-      # - name: Build & Push Docker Image (Only for Main Branch)
-      #   run: |
-      #     if [[ "$DEPLOY_MODE" == "full" ]]; then
-      #       gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-      #       docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
-      #       docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
-      #     else
-      #       echo "Skipping Docker image build and push"
-      #     fi
-
-      # - name: Terraform Apply
-      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: |
-      #     if [[ "$DEPLOY_MODE" == "full" ]]; then
-      #       terraform apply -auto-approve -input=false
-      #     else
-      #       echo "Skipping Terraform Apply"
-      #     fi
-
-      # - name: Terraform Apply (For pushing non-main)
-      #   run: |
-      #     if [[ "$DEPLOY_MODE" == "deploy-only" ]]; then
-      #       terraform apply -auto-approve -var="image_tag=latest"
-      #     else
-      #       echo "Skipping Terraform Apply"
-      #     fi
+      - name: Terraform Apply (For staging only)
+        run: |
+          if: [[env.TARGET_BRANCH == 'staging' && github.event_name == 'push']]; then
+            terraform apply -auto-approve -var="image_tag=latest"
+          else
+            echo "Skipping Terraform Apply"
+          fi
