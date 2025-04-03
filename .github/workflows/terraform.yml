@@ -25,8 +25,10 @@ jobs:
       #   with:
       #     credentials_json: ${{ secrets.GCP_SA }}
 
-      - name: Echo GITHUB_REF
-        run: echo "${GITHUB_REF}"
+      - name: Debug Pull Request Source Branch
+        if: github.event_name == 'pull_request' # Only run if it's a PR event
+        run: |
+          echo "This pull request is coming from branch: ${{ github.head_ref }}"
 
       # - name: Set Environment Variables
       #   run: |
