@@ -92,9 +92,10 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Build JAR for main branch
+      - name: Build JAR
         if: ${{ env.TARGET_BRANCH == 'main' }}
         run: mvn clean package -DskipTests
+        working-directory: ./
 
       - name: Build & Push Docker Image (Only for Main Branch)
         if: env.TARGET_BRANCH == 'main'
