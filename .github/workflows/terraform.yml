@@ -43,7 +43,7 @@ jobs:
       - name: Check if Deployment Files Changed
         id: check_deploy
         run: |
-          CHANGED_FILES=$(git diff --name-only HEAD~1)
+          CHANGED_FILES=$(git diff --name-only origin/main)
           echo "$CHANGED_FILES" > changed_files.txt
 
           if grep -q "src/" changed_files.txt || grep -q "Dockerfile" changed_files.txt; then
