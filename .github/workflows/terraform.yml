@@ -94,6 +94,7 @@ jobs:
 
       - name: Build JAR for main branch
         if: env.TARGET_BRANCH == 'main'
+        working-directory: src
         run: mvn clean package -DskipTests
 
       - name: Build & Push Docker Image (Only for Main Branch)
