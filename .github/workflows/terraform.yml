@@ -103,6 +103,7 @@ jobs:
           gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
           docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
           docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
+        working-directory: ./
 
       - name: Terraform Apply
         run: |
