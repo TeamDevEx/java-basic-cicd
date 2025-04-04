@@ -87,12 +87,12 @@ jobs:
       name: Development
       url: "http://dev.demoApp.com"
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Deploy
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          pwd
-          terraform apply -auto-approve -input=false
-        working-directory: ./
+        run: terraform apply -auto-approve -input=false
 
   # Staging:
   #   name: Deploy to Staging
