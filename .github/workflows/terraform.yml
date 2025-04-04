@@ -108,32 +108,49 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
 
-  # Staging:
-  #   name: Deploy to Staging
-  #   if: github.event.ref== 'refs/heads/main'
-  #   needs: [Build]
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: Staging
-  #     url: "http://dev.test_demoApp.com"
-  #   steps:
-  #     - name: Set up JDK 17 for main branch
-  #       uses: actions/setup-java@v3
-  #       with:
-  #         distribution: "temurin"
-  #         java-version: "17"
+  Staging:
+    name: Deploy to Staging
+    if: github.event.ref== 'refs/heads/main'
+    needs: [Build]
+    runs-on: ubuntu-latest
+    environment:
+      name: Staging
+      url: "http://dev.test_demoApp.com"
+    steps:
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
 
-  #     - name: Build JAR
-  #       run: mvn clean package -DskipTests
-  #       working-directory: ./
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #     - name: Build & Push Docker Image (Only for Main Branch)
-  #       run: |
-  #         gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-  #         docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
-  #         docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
-  #       working-directory: ./
+      - uses: google-github-actions/auth@v1
+        id: auth
+        with:
+          credentials_json: ${{ secrets.GCP_SA }}
 
-  #     - name: Terraform Apply (Staging)
-  #       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-  #       run: terraform apply -auto-approve -var="image_tag=latest"
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Set up JDK 17 for main branch
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Build JAR
+        run: mvn clean package -DskipTests
+        working-directory: ./
+
+      - name: Build & Push Docker Image (Only for Main Branch)
+        run: |
+          gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
+          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
+          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
+        working-directory: ./
+
+      - name: Terraform Apply (Staging)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -var="image_tag=latest"
