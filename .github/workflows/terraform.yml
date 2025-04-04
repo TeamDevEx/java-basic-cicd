@@ -1,6 +1,6 @@
 defaults:
   run:
-    working-directory: "terraform"
+    working-directory: "terraform/modules/gcp_resource"
 
 name: Spring Boot CI/CD Pipeline with Environments
 
@@ -83,6 +83,7 @@ jobs:
     name: Terraform Apply (Main)
     needs: [Build]
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: Development
       url: "http://dev.demoApp.com"
@@ -105,14 +106,13 @@ jobs:
         run: terraform init
 
       - name: Deploy
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
 
   Staging:
     name: Deploy to Staging
-    if: github.event.ref== 'refs/heads/main'
     needs: [Build]
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: Staging
       url: "http://dev.test_demoApp.com"
@@ -152,5 +152,5 @@ jobs:
         working-directory: ./
 
       - name: Terraform Apply (Staging)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -var="image_tag=latest"
+        run: terraform apply -auto-approve -input=false
+        working-directory: ./terraform/modules/deployment/java
