@@ -110,6 +110,7 @@ jobs:
 
   Staging:
     name: Deploy to Staging
+    needs: [Build]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
@@ -132,11 +133,9 @@ jobs:
 
       - name: Initialize Terraform
         run: terraform init
-        working-directory: ./terraform/modules/deployment
 
       - name: Initialize Terraform
         run: terraform plan
-        working-directory: ./terraform/modules/deployment
 
       - name: Set up JDK 17 for main branch
         uses: actions/setup-java@v3
@@ -157,4 +156,3 @@ jobs:
 
       - name: Terraform Apply (Staging)
         run: terraform apply -auto-approve -input=false
-        working-directory: ./terraform/modules/deployment
