@@ -1,6 +1,6 @@
 defaults:
   run:
-    working-directory: "terraform/modules/gcp_resource"
+    working-directory: "terraform"
 
 name: Spring Boot CI/CD Pipeline with Environments
 
