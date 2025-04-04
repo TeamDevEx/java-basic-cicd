@@ -34,7 +34,7 @@ resource "kubernetes_deployment" "deployment" {
       spec {
         container {
           name  = "spring-boot-rest-app-1"
-          image = "northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest"
+          image = "northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:${var.image_tag}"
         }
       }
     }
