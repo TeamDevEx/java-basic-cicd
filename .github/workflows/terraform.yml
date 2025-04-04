@@ -133,6 +133,7 @@ jobs:
 
       - name: Initialize Terraform
         run: terraform init
+        working-directory: ./terraform/modules/gcp_resource/deployment
 
       - name: Set up JDK 17 for main branch
         uses: actions/setup-java@v3
