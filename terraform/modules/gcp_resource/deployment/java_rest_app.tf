@@ -6,11 +6,6 @@ data "google_container_cluster" "my_cluster" {
 
 data "google_client_config" "provider" {}
 
-variable "image_tag" {
-  description = "Docker Image Tag"
-  type        = string
-}
-
 resource "kubernetes_deployment" "deployment" {
   metadata {
     name      = "java-rest-app"
