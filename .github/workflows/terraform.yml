@@ -90,8 +90,9 @@ jobs:
       - name: Deploy
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
+          echo pwd
           terraform apply -auto-approve -input=false
-        working-directory: terraform/modules/gcp_resource
+        working-directory: ./
 
   # Staging:
   #   name: Deploy to Staging
