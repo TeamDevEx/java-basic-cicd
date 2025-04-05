@@ -8,12 +8,5 @@ variable "region" {
   description = "Region to deploy resources in."
 }
 
-variable "repo_name" {
-  description = "Artifact Registry Repository Name"
-  type        = string
-}
 
-variable "image_tag" {
-  description = "Docker Image Tag"
-  type        = string
-}
+

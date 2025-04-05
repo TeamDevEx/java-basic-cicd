@@ -10,17 +10,6 @@ variable "region" {
   description = "Region to deploy java spring boot demo resources in."
 }
 
-variable "repo_name" {
-  type        = string
-  default     = "lendly-demo"
-  description = "Artifact Registry Repository Name"
-}
-
-variable "image_tag" {
-  type        = string
-  default     = "latest"
-  description = "Docker Image Tag"
-}
 
 
 

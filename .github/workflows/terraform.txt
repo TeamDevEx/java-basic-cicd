@@ -150,9 +150,9 @@ jobs:
       - name: Build & Push Docker Image (Only for Main Branch)
         run: |
           gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
-          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
+          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:dev .
+          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:dev
         working-directory: ./
 
-      - name: Terraform Apply (Staging)
+      - name: Terraform Apply (Development)
         run: terraform apply -auto-approve -input=false
