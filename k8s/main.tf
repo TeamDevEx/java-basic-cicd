@@ -8,9 +8,5 @@ module "deployment" {
   image_tag   = var.image_tag
 }
 
-resource "kubernetes_namespace" "env" {
-  metadata {
-    name = var.environment
-  }
-}
+
 
