@@ -125,8 +125,13 @@ jobs:
           docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:dev
         working-directory: ./
 
-      - name: Terraform Apply (Development)
-        run: terraform apply -var="environment=development" -var="image_tag=dev"
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+          -var="environment=development" \
+          -var="image_tag=dev" \
+          -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+          -var="repo_name=${{ secrets.GCR_REPO_NAME }}"
 
   Staging:
     name: Deploy to Staging
@@ -174,5 +179,10 @@ jobs:
           docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:staging
         working-directory: ./
 
-      - name: Terraform Apply (Staging)
-        run: terraform apply -var="environment=staging" -var="image_tag=staging"
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+          -var="environment=staging" \
+          -var="image_tag=staging" \
+          -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+          -var="repo_name=${{ secrets.GCR_REPO_NAME }}"
