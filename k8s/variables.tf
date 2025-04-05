@@ -28,8 +28,9 @@ variable "environment" {
 }
 
 variable "repo_name" {
-  description = "lendly-demo"
-  type        = string
+  description = "AR Repo name to deploy java spring boot demo resources in."
+  default = "lendly-demo"
+  type    = string
 }
 
 
