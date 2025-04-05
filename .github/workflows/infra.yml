@@ -1,3 +1,7 @@
+defaults:
+  run:
+    working-directory: "terraform"
+
 name: Deploy GCP Infra
 
 on:
