@@ -9,7 +9,7 @@ data "google_client_config" "provider" {}
 
 resource "kubernetes_namespace" "env" {
   metadata {
-    name = var.environment
+    name = "namespace-${var.environment}"  
   }
 }
 
@@ -17,7 +17,7 @@ resource "kubernetes_namespace" "env" {
 resource "kubernetes_deployment" "deployment" {
   metadata {
     name      = "java-rest-app"
-    namespace = var.environment
+    namespace = "namespace-${var.environment}"
     labels = {
       app = "java-rest-app"
     }
