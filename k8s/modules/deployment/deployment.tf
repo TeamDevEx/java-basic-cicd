@@ -6,7 +6,6 @@ data "google_container_cluster" "my_cluster" {
 
 data "google_client_config" "provider" {}
 
-
 resource "kubernetes_namespace" "env" {
   metadata {
     name = "namespace-${var.environment}"  
@@ -17,7 +16,7 @@ resource "kubernetes_namespace" "env" {
 resource "kubernetes_deployment" "deployment" {
   metadata {
     name      = "java-rest-app"
-    namespace = "namespace-${var.environment}"
+    namespace = kubernetes_namespace.env.metadata[0].name
     labels = {
       app = "java-rest-app"
     }
