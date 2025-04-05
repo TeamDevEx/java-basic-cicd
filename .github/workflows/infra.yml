@@ -1,10 +1,12 @@
+defaults:
+  run:
+    working-directory: "terraform/modules/gcp_resource/**"
+
 name: Deploy GCP Infra
 
 on:
   push:
     branches: ["main"]
-    paths:
-      - "terraform/modules/gcp_resource/**"
   pull_request:
 
 jobs:
