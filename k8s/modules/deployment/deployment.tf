@@ -85,7 +85,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "java_rest_app_hpa" {
 resource "kubernetes_service" "my_service" {
   metadata {
     name = "my-service"
-    kubernetes_deployment.deployment.metadata[0].name
+    namespace = kubernetes_namespace.env.metadata[0].name
   }
 
   spec {
