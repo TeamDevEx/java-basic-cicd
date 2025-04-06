@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "unit_economics"
-    prefix = "terraform/state"
+    bucket = "tf_backend_java_cicd"
+    prefix = "app"
   }
 }
