@@ -9,6 +9,9 @@ on:
     branches: ["main"]
   pull_request:
 
+env:
+  image_tag: ${{ github.sha }}
+
 jobs:
   Build:
     runs-on: ubuntu-latest
@@ -55,12 +58,12 @@ jobs:
         run: mvn clean package -DskipTests
         working-directory: ./
 
-      - name: Build & Push Docker Image (Only for Main Branch)
+      - name: Build & Push Docker Image
         if: steps.changes.outputs.app_changed == 'true'
         run: |
           gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:dev .
-          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:dev
+          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:$image_tag .
+          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:$image_tag
         working-directory: ./
 
       - name: Setup Terraform
@@ -125,7 +128,7 @@ jobs:
           if [[ "${{ steps.changes.outputs.app_changed }}" == 'true' ]]; then
             terraform apply -auto-approve \
               -var="environment=development" \
-              -var="image_tag=dev" \
+              -var="image_tag=$image_tag" \
               -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
               -var="repo_name=${{ secrets.GCR_REPO_NAME }}"
           elif [[ "${{ github.ref }}" == 'refs/heads/main' && "${{ github.event_name }}" == 'push' ]]; then
