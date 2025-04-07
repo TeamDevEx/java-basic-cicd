@@ -4,4 +4,5 @@ module "gcp_resource" {
   region     = var.region
   repo_name  = var.repo_name
   image_tag  = var.image_tag
+  environment = var.environment
 }

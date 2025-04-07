@@ -22,6 +22,14 @@ variable "image_tag" {
   description = "Docker Image Tag"
 }
 
-
+variable "environment" {
+  description = "Deployment environment: development, staging, or production"
+  type        = string
+  default     = "development"
+  validation {
+    condition     = contains(["development", "staging", "production"], var.environment)
+    error_message = "Environment must be one of: development, staging, production."
+  }
+}
 
 
