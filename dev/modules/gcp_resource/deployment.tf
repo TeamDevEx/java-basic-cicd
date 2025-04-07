@@ -12,7 +12,6 @@ resource "kubernetes_namespace" "env" {
   }
 }
 
-
 resource "kubernetes_deployment" "deployment" {
   metadata {
     name      = "java-rest-app-dev"
