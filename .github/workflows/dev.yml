@@ -117,7 +117,7 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Deploy Infra
+      - name: Deploy
         if: |
           github.ref == 'refs/heads/main' && github.event_name == 'push' ||
           steps.changes.outputs.app_changed == 'true'
