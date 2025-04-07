@@ -1,9 +1,9 @@
 resource "kubernetes_horizontal_pod_autoscaler_v2" "java_rest_app_hpa" {
   metadata {
-    name      = "java-rest-app-hpa-kfqf"
+    name      = "java-rest-app-hpa-dev"
     namespace = kubernetes_namespace.env.metadata[0].name
     labels = {
-      app = "java-rest-app"
+      app = "java-rest-app-dev"
     }
   }
 
@@ -31,15 +31,15 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "java_rest_app_hpa" {
 }
 
 
-resource "kubernetes_service" "my_service" {
+resource "kubernetes_service" "dev_service" {
   metadata {
-    name = "my-service"
+    name = "dev-service"
     namespace = kubernetes_namespace.env.metadata[0].name
   }
 
   spec {
     selector = {
-      app = "java-rest-app"
+      app = "java-rest-app-dev"
     }
 
     port {
