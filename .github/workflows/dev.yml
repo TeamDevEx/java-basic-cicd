@@ -16,6 +16,11 @@ jobs:
       name: Development
       url: "http://dev.test_demoApp.com"
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
 
@@ -23,11 +28,6 @@ jobs:
         id: auth
         with:
           credentials_json: ${{ secrets.GCP_SA }}
-
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Detect if app code changed
         id: changes
