@@ -19,6 +19,11 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
 
+      - uses: google-github-actions/auth@v1
+        id: auth
+        with:
+          credentials_json: ${{ secrets.GCP_SA }}
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -57,11 +62,6 @@ jobs:
           docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:dev .
           docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:dev
         working-directory: ./
-
-      - uses: google-github-actions/auth@v1
-        id: auth
-        with:
-          credentials_json: ${{ secrets.GCP_SA }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
