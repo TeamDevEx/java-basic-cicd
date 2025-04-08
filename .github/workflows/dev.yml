@@ -9,11 +9,11 @@ on:
     branches: ["main"]
   pull_request:
 
-# env:
-#   image_tag: ${{ github.sha }}
+env:
+  image_tag: latest
 
 jobs:
-  Validate:
+  Build:
     runs-on: ubuntu-latest
     environment:
       name: Development
@@ -61,8 +61,8 @@ jobs:
         if: steps.changes.outputs.app_changed == 'true'
         run: |
           gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest .
-          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest
+          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:$image_tag .
+          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:$image_tag
         working-directory: ./
 
       - name: Setup Terraform
@@ -123,6 +123,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           terraform apply -auto-approve \
-            -var="environment=development" \       
+            -var="environment=development" \   
+            -var="image_tag=$image_tag" \    
             -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
             -var="repo_name=${{ secrets.GCR_REPO_NAME }}"
