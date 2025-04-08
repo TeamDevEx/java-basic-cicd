@@ -40,7 +40,7 @@ resource "kubernetes_deployment" "deployment" {
       spec {
         container {
           name  = "spring-boot-rest-app"
-          image = "northamerica-northeast1-docker.pkg.dev/${var.project_id}/${var.repo_name}/spring-boot-rest-app:latest"
+          image = "northamerica-northeast1-docker.pkg.dev/${var.project_id}/${var.repo_name}/spring-boot-rest-app:${var.image_tag}"
         }
       }
     }
