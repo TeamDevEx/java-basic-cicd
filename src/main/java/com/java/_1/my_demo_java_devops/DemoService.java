@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 public class DemoService {
 
 	public String Hello() {
-		return "Hello apad-apad!! , The logic dreamer!!!!";
+		return "Hello Me Lucky me! , The logic dreamer!!!!";
 
 	}
 

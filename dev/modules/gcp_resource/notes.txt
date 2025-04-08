@@ -1,2 +1,7 @@
 issues dev
 - when release a new image(rollout)- deployment with same process broke replica,. will try new approach
+
+best approach i think is isolation
+- project_infra
+- dev deployment
+- staging deployment
