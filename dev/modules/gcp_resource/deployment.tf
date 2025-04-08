@@ -13,9 +13,9 @@ resource "kubernetes_namespace" "env" {
 }
 
 
-resource "kubernetes_deployment" "deployment-2" {
+resource "kubernetes_deployment" "deployment-3" {
   metadata {
-    name      = "java-rest-app-dev-2"
+    name      = "java-rest-app-dev-3"
     namespace = kubernetes_namespace.env.metadata[0].name
   }
 
@@ -24,14 +24,14 @@ resource "kubernetes_deployment" "deployment-2" {
 
     selector {
       match_labels = {
-        app = "java-rest-app-dev-2"
+        app = "java-rest-app-dev-3"
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "java-rest-app-dev-2"
+          app = "java-rest-app-dev-3"
         }
       }
 
