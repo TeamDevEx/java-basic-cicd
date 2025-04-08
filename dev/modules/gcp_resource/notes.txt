@@ -5,3 +5,6 @@ best approach i think is isolation
 - project_infra
 - dev deployment
 - staging deployment
+
+- seperate dev/infra   and dev deployment - fine in 1 round
+- error once deploy changes in app- - wip
