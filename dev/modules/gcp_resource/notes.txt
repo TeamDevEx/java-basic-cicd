@@ -1,0 +1,2 @@
+issues dev
+- when release a new image(rollout)- deployment with same process broke replica,. will try new approach
