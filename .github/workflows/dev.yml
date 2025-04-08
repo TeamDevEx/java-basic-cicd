@@ -98,16 +98,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect App Code Changes
+      - name: Detect if app code changed
         id: changes
         run: |
           git fetch origin main
-          if git diff --name-only origin/main..HEAD | grep -q '^src/'; then
+          MERGE_BASE=$(git merge-base HEAD origin/main)
+          if git diff --name-only $MERGE_BASE HEAD | grep -q '^src/'; then
             echo "app_changed=true" >> $GITHUB_OUTPUT
-            echo "✅ App code changes detected!"
+            echo "✅ Changes were made in Application!"
           else
             echo "app_changed=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No app code changes."
+            echo "ℹ️ No Changes were made in Application."
           fi
 
       - name: Set up JDK 17 for main branch
