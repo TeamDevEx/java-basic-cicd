@@ -8,3 +8,5 @@ best approach i think is isolation
 
 - seperate dev/infra   and dev deployment - fine in 1 round
 - error once deploy changes in app- - wip
+
+run dev-deployment to clean-up deployment as well
