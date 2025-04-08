@@ -12,6 +12,8 @@ on:
 env:
   image_tag: latest
   environment: development
+  project_id: ${{ secrets.GCP_PROJECT_ID }}
+  repo_name=: ${{ secrets.GCR_REPO_NAME }}
 
 jobs:
   Build:
@@ -126,5 +128,5 @@ jobs:
           terraform apply -auto-approve \
             -var="environment=$development" \   
             -var="image_tag=$image_tag" \    
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -var="repo_name=${{ secrets.GCR_REPO_NAME }}"
+            -var="project_id=$project_id" \
+            -var="repo_name=$repo_name"
