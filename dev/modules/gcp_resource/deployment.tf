@@ -40,11 +40,11 @@ resource "kubernetes_deployment" "deployment" {
           image = "northamerica-northeast1-docker.pkg.dev/${var.project_id}/${var.repo_name}/spring-boot-rest-app:${var.image_tag}"
 
           resources {
-            requests {
+            requests = {
               cpu    = "500m"
               memory = "256Mi"
             }
-            limits {
+            limits = {
               cpu    = "1"
               memory = "512Mi"
             }
@@ -81,5 +81,3 @@ resource "kubernetes_deployment" "deployment" {
     }
   }
 }
-
-
