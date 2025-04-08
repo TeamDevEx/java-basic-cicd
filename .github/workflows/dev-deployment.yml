@@ -1,13 +1,11 @@
 defaults:
   run:
-    working-directory: "dev"
+    working-directory: "dev-deployment"
 
-name: Spring Boot Infra
+name: Spring Boot Deployment
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
+  workflow_dispatch:
 
 env:
   image_tag: latest
@@ -35,39 +33,6 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
 
-      - name: Detect if app code changed
-        id: changes
-        run: |
-          git fetch origin main
-          MERGE_BASE=$(git merge-base HEAD origin/main)
-          if git diff --name-only $MERGE_BASE HEAD | grep -q '^src/'; then
-            echo "app_changed=true" >> $GITHUB_OUTPUT
-            echo "✅ Changes were made in Application!"
-          else
-            echo "app_changed=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No Changes were made in Application."
-          fi
-
-      - name: Set up JDK 17 for main branch
-        if: steps.changes.outputs.app_changed == 'true'
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - name: Build JAR
-        if: steps.changes.outputs.app_changed == 'true'
-        run: mvn clean package -DskipTests
-        working-directory: ./
-
-      - name: Build & Push Docker Image
-        if: steps.changes.outputs.app_changed == 'true'
-        run: |
-          gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-          docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:$image_tag .
-          docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:$image_tag
-        working-directory: ./
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
@@ -82,12 +47,6 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-
-      - name: Terraform Plan
-        id: plan
-        if: github.event_name == 'pull_request'
-        run: terraform plan -no-color -input=false
-        continue-on-error: true
 
       - uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
@@ -122,6 +81,11 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Deploy (App Changed)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+      - name: Deploy to Dev Enviroment
+        if: github.ref == 'refs/heads/dev-deployment' && github.event_name == 'push'
+        run: |
+          terraform apply -auto-approve \
+            -var="environment=${{ env.environment }}" \
+            -var="image_tag=${{ env.image_tag }}" \
+            -var="project_id=${{ env.project_id }}" \
+            -var="repo_name=${{ env.repo_name }}"
