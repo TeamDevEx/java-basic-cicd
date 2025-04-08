@@ -86,29 +86,28 @@ jobs:
 
   Deploy:
     name: Deploy to Development
+    needs: [Validate]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: Development
       url: "http://dev.test_demoApp.com"
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Detect if app code changed
+      - name: Detect App Code Changes
         id: changes
         run: |
           git fetch origin main
-          MERGE_BASE=$(git merge-base HEAD origin/main)
-
           if git diff --name-only origin/main...HEAD | grep -q '^src/'; then
             echo "app_changed=true" >> $GITHUB_OUTPUT
-            echo "Changes were made in Application!!!"
+            echo "✅ App code changes detected!"
           else
             echo "app_changed=false" >> $GITHUB_OUTPUT
-            echo "NO Changes were made in Application!!!"
+            echo "ℹ️ No app code changes."
           fi
 
       - name: Set up JDK 17 for main branch
