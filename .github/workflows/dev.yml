@@ -35,6 +35,13 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
 
+      - name: Debug Variables
+        run: |
+          echo "Environment: ${{ env.environment }}"
+          echo "Image Tag: ${{ env.image_tag }}"
+          echo "Project ID: ${{ env.project_id }}"
+          echo "Repo Name: ${{ env.repo_name }}"
+
       - name: Detect if app code changed
         id: changes
         run: |
@@ -122,11 +129,11 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Deploy (App Changed)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          terraform apply -auto-approve \
-            -var="environment=${{ env.environment }}" \
-            -var="image_tag=${{ env.image_tag }}" \
-            -var="project_id=${{ env.project_id }}" \
-            -var="repo_name=${{ env.repo_name }}"
+      # - name: Deploy (App Changed)
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: |
+      #     terraform apply -auto-approve \
+      #       -var="environment=${{ env.environment }}" \
+      #       -var="image_tag=${{ env.image_tag }}" \
+      #       -var="project_id=${{ env.project_id }}" \
+      #       -var="repo_name=${{ env.repo_name }}"
