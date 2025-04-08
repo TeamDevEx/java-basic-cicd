@@ -19,6 +19,14 @@ jobs:
       name: Development
       url: "http://dev.test_demoApp.com"
     steps:
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - uses: google-github-actions/auth@v1
+        id: auth
+        with:
+          credentials_json: ${{ secrets.GCP_SA }}
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -56,14 +64,6 @@ jobs:
           docker build -t northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:$image_tag .
           docker push northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:$image_tag
         working-directory: ./
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-
-      - uses: google-github-actions/auth@v1
-        id: auth
-        with:
-          credentials_json: ${{ secrets.GCP_SA }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
