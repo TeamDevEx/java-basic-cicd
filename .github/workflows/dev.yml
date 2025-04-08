@@ -22,6 +22,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - uses: google-github-actions/auth@v1
+        id: auth
+        with:
+          credentials_json: ${{ secrets.GCP_SA }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
