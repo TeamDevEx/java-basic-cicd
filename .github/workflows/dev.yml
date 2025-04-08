@@ -102,7 +102,7 @@ jobs:
         id: changes
         run: |
           git fetch origin main
-          if git diff --name-only origin/main...HEAD | grep -q '^src/'; then
+          if git diff --name-only origin/main..HEAD | grep -q '^src/'; then
             echo "app_changed=true" >> $GITHUB_OUTPUT
             echo "✅ App code changes detected!"
           else
