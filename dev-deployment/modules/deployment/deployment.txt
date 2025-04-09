@@ -44,7 +44,14 @@ resource "kubernetes_deployment" "deployment" {
         }
       }
     }
+
+    strategy {
+      type = "RollingUpdate"
+
+      rolling_update {
+        max_surge       = "25%"
+        max_unavailable = "25%"
+      }
+    }
   }
 }
-
-
