@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  image_tag: latest
+  image_tag: ${{ secrets.IMAGE_TAG }}
   environment: development
   project_id: off-net-dev
   repo_name: lendly-demo
