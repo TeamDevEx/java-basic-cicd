@@ -1,6 +1,6 @@
 defaults:
   run:
-    working-directory: "dev-deployment/modules/staging"
+    working-directory: "staging-deployment"
 
 name: Spring Boot Staging Deployment
 
@@ -9,7 +9,7 @@ on:
 
 env:
   image_tag: ${{ secrets.IMAGE_TAG }}
-  environment: development
+  environment: staging
   project_id: off-net-dev
   repo_name: lendly-demo
 
@@ -58,5 +58,5 @@ jobs:
           echo "image_sha=$IMAGE_SHA" >> $GITHUB_ENV    
           echo "Image SHA: $IMAGE_SHA"
 
-      - name: Deploy (App Changed)
-        run: terraform apply -auto-approve -input=false
+      # - name: Deploy (App Changed)
+      #   run: terraform apply -auto-approve -input=false
