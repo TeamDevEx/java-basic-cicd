@@ -1,0 +1,62 @@
+defaults:
+  run:
+    working-directory: "dev-deployment/modules/staging"
+
+name: Spring Boot Staging Deployment
+
+on:
+  workflow_dispatch:
+
+env:
+  image_tag: ${{ secrets.IMAGE_TAG }}
+  environment: development
+  project_id: off-net-dev
+  repo_name: lendly-demo
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    environment:
+      name: Staging
+      url: "http://dev.test_demoApp.com"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: google-github-actions/auth@v1
+        id: auth
+        with:
+          credentials_json: ${{ secrets.GCP_SA }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      # - name: Deploy to Dev Enviroment
+      #   run: |
+      #     terraform apply -auto-approve \
+      #       -var="environment=${{ env.environment }}" \
+      #       -var="image_tag=${{ env.image_tag }}" \
+      #       -var="project_id=${{ env.project_id }}" \
+      #       -var="repo_name=${{ env.repo_name }}"
+      - name: Get Latest Image SHA
+        id: get_sha
+        run: |
+          IMAGE_SHA=$(gcloud artifacts docker images describe northamerica-northeast1-docker.pkg.dev/off-net-dev/lendly-demo/spring-boot-rest-app:latest --format="value(image_summary.digest)")
+          echo "image_sha=$IMAGE_SHA" >> $GITHUB_ENV    
+          echo "Image SHA: $IMAGE_SHA"
+
+      - name: Deploy (App Changed)
+        run: terraform apply -auto-approve -input=false
