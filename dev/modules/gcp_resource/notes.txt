@@ -10,3 +10,7 @@ best approach i think is isolation
 - error once deploy changes in app- - wip
 
 run dev-deployment to clean-up deployment as well
+
+finally - the trick is to add strategy rollout 
+
+wip - how to grab the sha automated
